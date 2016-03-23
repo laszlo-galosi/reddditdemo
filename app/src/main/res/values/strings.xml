@@ -1,0 +1,15 @@
+<resources>
+  <string name="app_name">Reddit Demo</string>
+
+  <string name="google_maps_key" translatable="false">AIzaSyBT4r2e8YPunZi2tq6KiJSyRJyezVdCxfs
+  </string>
+  <string name="open_weather_maps_apikey" translateable="false" translatable="false">123456789
+  </string>
+  <string name="snack_action_ok">Ok</string>
+  <string name="snack_action_retry">Retry</string>
+  <string name="snack_general_error">Internal error</string>
+  <string name="snack_error_fetch_data">Network error, check the settings</string>
+  <string name="snack_no_location_service">Cannot retrieve GPS data</string>
+  <string name="snack_error_check_internet">Check internet connection.</string>
+  <string name="posted_at">posted at</string>
+</resources>
