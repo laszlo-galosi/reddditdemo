@@ -2,9 +2,9 @@ package hu.reddit.developer.redditdemo;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.util.Log;
 import hu.reddit.developer.data.RedditEntity;
 import java.util.List;
+import trikita.log.Log;
 
 /**
  * Created by LargerLife on 26/04/15.
@@ -25,7 +25,7 @@ public class RefreshService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(TAG, ".onHandleIntent");
+        Log.d("onHandleIntent");
         RedditApp app = (RedditApp) getApplication();
         try {
             app.clearEntries();
@@ -33,7 +33,7 @@ public class RefreshService extends IntentService {
             //Collections.sort(timeline, new StatusComparator());
             app.setEntries(timeline);
         } catch (Exception e) {
-            Log.e(TAG, "Cannot retrieve user timeline:" + twitter.getSelf().getName(), e);
+            Log.e("Cannot retrieve subreddit", e);
         }
     }
 

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import trikita.log.Log;
 
 import static java.lang.String.format;
 
@@ -172,7 +172,7 @@ public class ListingFragment extends Fragment {
     private void startFetchDataService() {
         Intent fetchIntent = new Intent(Constants.FETCH_DATA_ACTION);
         fetchIntent.addCategory(Constants.FETCH_DATA_CATEGORY);
-        Log.d("startFetchDataService with ", fetchIntent);
+        Log.d("startFetchDataService with ", fetchIntent.toString());
         //we need an explicit intent since Android L
         //see: https://commonsware.com/blog/2014/06/29/dealing-deprecations-bindservice.html
         getActivity().startService(
