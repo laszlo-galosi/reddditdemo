@@ -2,22 +2,27 @@ package hu.reddit.developer.redditdemo;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import hu.reddit.developer.data.RedditEntity;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.Calendar;
+import java.util.TimeZone;
 import trikita.log.Log;
-
-import static java.lang.String.format;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,23 +34,24 @@ import static java.lang.String.format;
 public class ListingFragment extends Fragment {
 
     public static final String TAG = "ListingFragment";
+    @Bind(R.id.rv_main_content) RecyclerView mRecyclerView;
     private ItemAdapter mListingAdapter;
-    private RecyclerView mRecyclerView;
-    private List<RedditWrapper> mListingItems = new ArrayList<>(50);
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment TimelineFragment.
      */
-    public static ListingFragment newInstance(String param1, String param2) {
-        Log.d(TAG, "newInstance");
-        ListingFragment fragment = new ListingFragment();
-        Bundle args = new Bundle();
-        return fragment;
+    public static ListingFragment newInstance(Bundle bundle) {
+        ListingFragment listingFragment = new ListingFragment();
+        Log.w("newInstance ", bundle);
+        if (bundle != null) {
+            listingFragment.setArguments(bundle);
+        } else {
+            listingFragment.setArguments(new Bundle());
+        }
+        return listingFragment;
     }
 
     public ListingFragment() {
@@ -64,10 +70,12 @@ public class ListingFragment extends Fragment {
         Log.d(TAG, "onCreateView");
 
         View rootView = inflater.inflate(R.layout.fragment_listing, container, false);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.rv_main_content);
+        ButterKnife.bind(this, rootView);
+
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLongClickable(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        setupAdapter();
         return rootView;
     }
 
@@ -80,22 +88,23 @@ public class ListingFragment extends Fragment {
                       View view = LayoutInflater.from(mContext)
                                                 .inflate(R.layout.list_item_reddit, parent,
                                                          false);
-                      return new RedditViewHolder(view, getActivity());
+                      return new ListingViewHolder(view, getActivity());
                   }
               };
         mRecyclerView.setAdapter(mListingAdapter);
     }
 
     private RedditApp getRedditApp() {
-        return (RedditApp) ((MainActivity) getActivity()).getApplication();
+        return ((BaseActivity) getActivity()).getRedditApp();
     }
 
     @Override public void onResume() {
         super.onResume();
-        RedditApp app = getRedditApp();
+        BaseActivity activity = (BaseActivity) getActivity();
+        RedditApp app = activity.getRedditApp();
         app.clearEntries();
         app.setListingObserver(new ListingObserver());
-        startFetchDataService();
+        activity.startFetchRedditService();
     }
 
     @Override public void onPause() {
@@ -105,77 +114,88 @@ public class ListingFragment extends Fragment {
         app.clearEntries();
     }
 
-    static class RedditViewHolder extends ItemViewHolderBase {
-        public RedditViewHolder(final View itemView, final Context context) {
+    @Override public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    private static String getCreatedText(final RedditEntity reddit) {
+        long ts = new Double(reddit.created_utc).longValue();
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(ts);
+        cal.setTimeZone(TimeZone.getDefault());
+        return SimpleDateFormat.getDateTimeInstance().format(cal.getTime());
+    }
+
+    static class ListingViewHolder extends ItemViewHolderBase implements Target {
+
+        @Bind(R.id.itemText) TextView mItemTextView;
+        //@Bind(R.id.itemDate) TextView mItemDateView;
+        @Bind(R.id.itemInfo) TextView mItemInfoView;
+        @Bind(R.id.btnComments) Button mNumOfCommentsView;
+        @Bind(R.id.itemThumb) ImageView mThumbView;
+
+        public ListingViewHolder(final View itemView, final Context context) {
             super(itemView, context);
+            ButterKnife.bind(this, itemView);
         }
 
         @Override public void bind(final Object dataItem) {
             super.bind(dataItem);
             final RedditEntity reddit = (RedditEntity) dataItem;
-            TextView tvItemTitle = (TextView) mItemView.findViewById(R.id.itemTitle);
-            TextView tvItemDate = (TextView) mItemView.findViewById(R.id.itemDate);
 
-            if (tvItemDate != null) {
-                String postedAt = mContext.getString(R.string.posted_at);
-                getCreatedText(reddit);
-                tvItemTitle.setText(format("%s %s", postedAt, getCreatedText(reddit)));
+            mItemTextView.setText(reddit.title);
+            //mItemDateView.setText(
+            //      String.format("%s %s", mContext.getString(R.string.posted_at),
+            //                    getCreatedText(reddit))
+            //);
+            mItemInfoView.setText(
+                  String.format("%s %s", mContext.getString(R.string.by_author), reddit.author)
+            );
+            mNumOfCommentsView.setText(String.format("%d", reddit.num_comments));
+
+            try {
+                Uri builtUri = Uri.parse(reddit.thumbnail).buildUpon().build();
+
+                Picasso picasso = Picasso.with(mContext);
+                picasso.setIndicatorsEnabled(true);
+                picasso.load(builtUri)
+                       .centerCrop()
+                       .resizeDimen(R.dimen.thumb_width, R.dimen.thumb_height)
+                       .error(R.drawable.reddit_logo)
+                       .placeholder(R.drawable.reddit_logo)
+                       .into(this);
+            } catch (final Exception ex) {
+                Log.e("Failed to load Bitmap from resource", reddit.thumbnail, ex);
             }
-            if (tvItemTitle != null) {
-                tvItemTitle.setText(reddit.title);
-            }
-        }
-    }
-
-    private static String getCreatedText(final RedditEntity reddit) {
-        long ts = new Double(reddit.created).longValue();
-        Date createdDate = new Date(ts);
-        return SimpleDateFormat.getDateTimeInstance().format(createdDate);
-    }
-
-    static class RedditWrapper implements Bindable {
-        RedditEntity mEntity;
-
-        public RedditWrapper(final RedditEntity entity) {
-            mEntity = entity;
         }
 
-        @Override public void bind(final Object dataItem) {
-            mEntity = (RedditEntity) dataItem;
+        @Override public void onBitmapLoaded(final Bitmap bitmap, final Picasso.LoadedFrom from) {
+            mThumbView.setImageBitmap(bitmap);
         }
 
-        @Override public Object getDatatItem() {
-            return mEntity;
+        @Override public void onBitmapFailed(final Drawable errorDrawable) {
+            Log.e("Failed to load Bitmap from resource", ((RedditEntity) getDatatItem()).thumbnail);
+            mThumbView.setImageDrawable(errorDrawable);
+        }
+
+        @Override public void onPrepareLoad(final Drawable placeHolderDrawable) {
+            mThumbView.setImageDrawable(placeHolderDrawable);
         }
     }
 
     class ListingObserver extends RecyclerView.AdapterDataObserver {
         @Override public void onChanged() {
-            if (mListingAdapter == null) {
-                setupAdapter();
-            }
             mListingAdapter.notifyDataSetChanged();
         }
 
-        @Override public void onItemRangeInserted(final int positionStart, final int itemCount) {
+        @Override
+        public void onItemRangeInserted(final int positionStart, final int itemCount) {
             mListingAdapter.notifyItemRangeInserted(positionStart, itemCount);
         }
 
         @Override public void onItemRangeRemoved(final int positionStart, final int itemCount) {
             mListingAdapter.notifyItemRangeRemoved(positionStart, itemCount);
         }
-    }
-
-    /**
-     * Creates an IntentService wich connects to the openWeatherMap API.
-     */
-    private void startFetchDataService() {
-        Intent fetchIntent = new Intent(Constants.FETCH_DATA_ACTION);
-        fetchIntent.addCategory(Constants.FETCH_DATA_CATEGORY);
-        Log.d("startFetchDataService with ", fetchIntent.toString());
-        //we need an explicit intent since Android L
-        //see: https://commonsware.com/blog/2014/06/29/dealing-deprecations-bindservice.html
-        getActivity().startService(
-              MainActivity.convertToExplicitIntent(getActivity(), fetchIntent));
     }
 }

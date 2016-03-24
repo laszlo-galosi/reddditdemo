@@ -12,4 +12,5 @@
   <color name="secondary_base">#e0e0e0</color>
   <color name="text_primary">#3f474c</color>
   <color name="text_secondary">#a1b5b2</color>
+  <color name="translucent_100">#00ffffff</color>
 </resources>

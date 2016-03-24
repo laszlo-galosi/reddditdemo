@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 23
-  buildToolsVersion "23.0.2"
+  buildToolsVersion "22.0.0"
 
   defaultConfig {
     applicationId "hu.reddit.developer.redditdemo"
@@ -29,10 +29,15 @@ dependencies {
   compile 'com.android.support:appcompat-v7:23.1.0'
   compile 'com.android.support:design:23.1.0'
   compile 'co.trikita:log:1.1.1'
+  compile 'com.jakewharton:butterknife:7.0.1'
 
   //Networking
   compile 'com.google.code.gson:gson:2.3'
   compile 'com.squareup.okhttp:okhttp:2.3.0'
+  compile 'com.squareup.retrofit:retrofit:1.9.0'
+  compile 'io.reactivex:rxjava:1.0.12'
+  compile 'io.reactivex:rxandroid:0.24.0'
+  compile 'com.squareup.picasso:picasso:2.5.2'
 
   //Testing
   testCompile 'junit:junit:4.12'

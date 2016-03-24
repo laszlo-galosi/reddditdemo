@@ -1,32 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
+>
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="0.1"
+      android:orientation="horizontal"
+      android:layout_gravity="left|center_vertical"
+      android:paddingLeft="?android:listPreferredItemPaddingLeft"
+      android:paddingTop="12dp"
+  >
+    <ImageView
+        android:id="@+id/itemThumb"
+        android:layout_width="@dimen/thumb_width"
+        android:layout_height="@dimen/thumb_height"
+        android:layout_gravity="left|center_vertical"
+        android:scaleType="centerCrop"
+        android:src="@drawable/reddit_logo"
+    />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="left|center_vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="?android:listPreferredItemPaddingRight"
     >
-  <TextView
-      android:id="@+id/itemTitle"
+
+      <TextView
+          android:id="@+id/itemText"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.TextView.PopupMenu"
+          android:textColor="@color/text_primary"
+          android:layout_gravity="left|center_vertical"
+          android:maxLines="3"
+          android:ellipsize="end"
+          tools:text="@string/lorem_ipsum"/>
+    </LinearLayout>
+  </LinearLayout>
+  <LinearLayout
+      android:id="@+id/itemComments"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:paddingLeft="?android:listPreferredItemPaddingLeft"
-      android:paddingRight="?android:listPreferredItemPaddingRight"
-      android:paddingTop="8dp"
-      android:paddingBottom="8dp"
-      android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.TextView"
-      android:textColor="@color/text_secondary"
-      android:gravity="left|center_vertical"
-      tools:text="user"/>
-  <TextView
-      android:id="@+id/itemDate"
+      android:layout_gravity="right|center_vertical"
+      android:paddingLeft="?android:listPreferredItemPaddingRight"
+      android:orientation="horizontal"
+  >
+    <TextView
+        android:id="@+id/itemInfo"
+        android:layout_width="0dp"
+        android:layout_weight="0.8"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.TextView"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        android:layout_gravity="left|center_vertical"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="by user"/>
+    <Button
+        android:id="@+id/btnComments"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:scaleType="centerInside"
+        android:background="@color/translucent_100"
+        android:drawableLeft="@drawable/ic_acomments_48dp"
+        android:maxLines="1"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.TextView"
+        android:textAlignment="viewEnd"
+        android:paddingRight="?android:listPreferredItemPaddingRight"
+        tools:text="12476"
+    />
+  </LinearLayout>
+  <ImageView
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:paddingLeft="?android:listPreferredItemPaddingLeft"
-      android:paddingRight="?android:listPreferredItemPaddingRight"
-      android:paddingBottom="16dp"
-      android:minHeight="?android:attr/listPreferredItemHeight"
-      android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.TextView.PopupMenu"
-      android:textColor="@color/text_primary"
-      android:gravity="left|top"
-      tools:text="This is an update message"/>
+      android:layout_height="1dp"
+      android:scaleType="fitXY"
+      android:src="@drawable/bottom_shadow"
+  />
 </LinearLayout>

@@ -3,7 +3,11 @@ package hu.reddit.developer.redditdemo;
 import android.app.Application;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import com.squareup.okhttp.Cache;
+import com.squareup.okhttp.OkHttpClient;
 import hu.reddit.developer.data.RedditEntity;
+import hu.reddit.developer.redditdemo.helpers.Constants;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,13 +40,6 @@ public class RedditApp extends Application {
         }
     }
 
-    public void setEntries(List<RedditEntity> entities) {
-        mEntries.addAll(entities);
-        if (mListingObserver != null) {
-            mListingObserver.onItemRangeInserted(0, entities.size());
-        }
-    }
-
     public void clearEntries() {
         int size = mEntries.size();
         mEntries.clear();
@@ -51,8 +48,24 @@ public class RedditApp extends Application {
         }
     }
 
+    public static OkHttpClient createOkHttpClient(Application app) {
+        OkHttpClient client = new OkHttpClient();
+        // Install an HTTP cache in the application cache directory.
+        File cacheDir = new File(app.getCacheDir(), "http");
+        Cache cache = new Cache(cacheDir, Constants.DISK_CACHE_SIZE);
+        client.setCache(cache);
+        return client;
+    }
+
     public List<RedditEntity> getEntries() {
         return mEntries;
+    }
+
+    public void setEntries(List<RedditEntity> entities) {
+        mEntries.addAll(entities);
+        if (mListingObserver != null) {
+            mListingObserver.onItemRangeInserted(0, entities.size());
+        }
     }
 
     public RedditApp setListingObserver(

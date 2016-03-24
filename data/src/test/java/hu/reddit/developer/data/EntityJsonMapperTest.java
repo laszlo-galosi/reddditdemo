@@ -1,6 +1,5 @@
 package hu.reddit.developer.data;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import java.util.List;
 import junit.framework.TestCase;
@@ -15,7 +14,13 @@ import static org.hamcrest.core.Is.isA;
  */
 public class EntityJsonMapperTest extends TestCase {
 
-    public static final String SAMPLE_JSON_CHILD = "{\"modhash\": \"\", \"children\": "
+    public static String SAMPLE_JSON_CHILD;
+    public static String SAMPLE_JSON_ROOT;
+
+    public static String SAMPLE_JSON_REDDIT;
+
+    static {
+        SAMPLE_JSON_CHILD = "{\"modhash\": \"\", \"children\": "
           + "[{\"kind\": \"t3\", \"data\": {\"domain\": \"i.imgur.com\", \"banned_by\": null, "
           + "\"media_embed\": {}, \"subreddit\": \"aww\", \"selftext_html\": null, "
           + "\"selftext\": \"\", \"likes\": null, \"suggested_sort\": null, \"user_reports\": "
@@ -50,7 +55,7 @@ public class EntityJsonMapperTest extends TestCase {
           + "\"distinguished\": null, \"mod_reports\": [], \"visited\": false, \"num_reports\":"
           + " null, \"ups\": 6079}}], \"after\": \"t3_4biscb\", \"before\": null}";
 
-    public final static String SAMPLE_JSON_LISTING = "{\"kind\": \"Listing\", \"data\": "
+        SAMPLE_JSON_ROOT = "{\"kind\": \"Listing\", \"data\": "
           + "{\"modhash\": \"\", \"children\": [{\"kind\": \"t3\", \"data\": {\"domain\": \"i"
           + ".imgur.com\", \"banned_by\": null, \"media_embed\": {}, \"subreddit\": \"aww\", "
           + "\"selftext_html\": null, \"selftext\": \"\", \"likes\": null, \"suggested_sort\": "
@@ -233,7 +238,52 @@ public class EntityJsonMapperTest extends TestCase {
           + "love it snow much!\", \"created_utc\": 1458665573.0, \"distinguished\": null, "
           + "\"mod_reports\": [], \"visited\": false, \"num_reports\": null, \"ups\": 5801}} ], "
           + "\"after\": \"t3_4biscb\", \"before\": null}}";
-    private Gson gson = new Gson();
+
+        SAMPLE_JSON_REDDIT = "{\"domain\":\"imgur.com\",\"banned_by\":null,\"media_embed\":{},"
+              + "\"subreddit\":\"aww\",\"selftext_html\":null,\"selftext\":\"\",\"likes\":null,"
+              + "\"suggested_sort\":null,\"user_reports\":[],\"secure_media\":null,"
+              + "\"link_flair_text\":null,\"id\":\"4bm6go\",\"from_kind\":null,\"gilded\":0,"
+              + "\"archived\":false,\"clicked\":false,\"report_reasons\":null,"
+              + "\"author\":\"slugsongs\",\"media\":null,\"score\":5996,\"approved_by\":null,"
+              + "\"over_18\":false,\"hidden\":false,"
+              + "\"preview\":{\"images\":[{\"source\":{\"url\":\"https://i.redditmedia"
+              + ".com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk"
+              + ".jpg?s=12d4d98acab9916ca9436f092f71f327\",\"width\":2448,\"height\":3264},"
+              + "\"resolutions\":[{\"url\":\"https://i.redditmedia"
+              + ".com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk.jpg?fit=crop&amp;"
+              + "crop=faces%2Centropy&amp;arh=2&amp;w=108&amp;"
+              + "s=eaa700b71d9da87e5652a633d4ee4d83\",\"width\":108,\"height\":144},"
+              + "{\"url\":\"https://i.redditmedia.com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk"
+              + ".jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=216&amp;"
+              + "s=da9f86be72f0efb99d149588ebabbe03\",\"width\":216,\"height\":288},"
+              + "{\"url\":\"https://i.redditmedia.com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk"
+              + ".jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=320&amp;"
+              + "s=fa6da87937d9f13875ff30443522183d\",\"width\":320,\"height\":426},"
+              + "{\"url\":\"https://i.redditmedia.com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk"
+              + ".jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=640&amp;"
+              + "s=bd9e62d268e017df7f79015e46b3dbd0\",\"width\":640,\"height\":853},"
+              + "{\"url\":\"https://i.redditmedia.com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk"
+              + ".jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=960&amp;"
+              + "s=e9e6d5a87acd5f00a345929c638dcad3\",\"width\":960,\"height\":1280},"
+              + "{\"url\":\"https://i.redditmedia.com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk"
+              + ".jpg?fit=crop&amp;crop=faces%2Centropy&amp;arh=2&amp;w=1080&amp;"
+              + "s=a19a9abf4a63c49e862846939f773e8b\",\"width\":1080,\"height\":1440}],"
+              + "\"variants\":{},\"id\":\"h8tpwHG-WrNIpB5YHKS1_BCN426KXhur2HHU8KYFEq4\"}]},"
+              + "\"num_comments\":812,\"thumbnail\":\"http://b.thumbs.redditmedia"
+              + ".com/6_-Sbz0sQLJiCAb1NENnEgYYVIftCX3pUxpHGxj8jVc.jpg\","
+              + "\"subreddit_id\":\"t5_2qh1o\",\"hide_score\":false,\"edited\":false,"
+              + "\"link_flair_css_class\":null,\"author_flair_css_class\":null,\"downs\":0,"
+              + "\"secure_media_embed\":{},\"saved\":false,\"removal_reason\":null,"
+              + "\"post_hint\":\"link\",\"stickied\":false,\"from\":null,\"is_self\":false,"
+              + "\"from_id\":null,"
+              + "\"permalink\":\"/r/aww/comments/4bm6go"
+              + "/i_had_to_chop_up_a_load_of_wood_he_wouldnt_leave/\",\"locked\":false,"
+              + "\"name\":\"t3_4bm6go\",\"created\":1458763583.0,\"url\":\"http://imgur"
+              + ".com/5nJNGTL\",\"author_flair_text\":null,\"quarantine\":false,\"title\":\"I had"
+              + " to chop up a load of wood, he wouldn't leave my side but I think we've found a "
+              + "solution...\",\"created_utc\":1458734783.0,\"distinguished\":null,"
+              + "\"mod_reports\":[],\"visited\":false,\"num_reports\":null,\"ups\":5996}";
+    }
 
     @Override public void setUp() throws Exception {
         super.setUp();
@@ -241,12 +291,13 @@ public class EntityJsonMapperTest extends TestCase {
 
     @Test public void test_TransformListingEntity_HappyCase() throws Exception {
 
-        EntityJsonMapper<RedditDataEntity> dataMapper = new EntityJsonMapper<>(gson);
-        RedditDataEntity mainEntity =
-              dataMapper.transformEntity(SAMPLE_JSON_LISTING, RedditDataEntity.class);
+        EntityJsonMapper<RedditDataEntity> dataMapper =
+              EntityJsonMapperFactory.getInstance().create(RedditDataEntity.class);
+        RedditDataEntity rootEntity =
+              dataMapper.transformEntity(SAMPLE_JSON_ROOT, RedditDataEntity.class);
 
         RedditListingDataEntity listingDataEntity =
-              (RedditListingDataEntity) mainEntity.getData(RedditListingDataEntity.class);
+              (RedditListingDataEntity) rootEntity.getData(RedditListingDataEntity.class);
         assertNotNull(listingDataEntity);
         assertThat(listingDataEntity, isA(RedditListingDataEntity.class));
         assertThat(listingDataEntity.modhash, is(""));
@@ -265,11 +316,11 @@ public class EntityJsonMapperTest extends TestCase {
                    is("http://b.thumbs.redditmedia"
                             + ".com/tMJCXfTNx6ZZEPIuOKM2qGrLJm5VCYubLru0_uFSn-o.jpg"));
         assertNotNull(redditEntity.preview);
-        List<ImageIdEntity> images = redditEntity.getImages();
+        List<ImageDataEntity> images = redditEntity.getImageData();
         assertNotNull(images);
         assertThat(images.size(), is(1));
 
-        ImageIdEntity imageId = images.get(0);
+        ImageDataEntity imageId = images.get(0);
         assertNotNull(imageId.source);
 
         ImageEntity sourceImage = imageId.getSourceImage();
@@ -283,15 +334,17 @@ public class EntityJsonMapperTest extends TestCase {
         assertNotNull(resolutions);
         assertThat(resolutions.size(), is(3));
 
-        EntityJsonMapper<RedditListingEntity> entityJsonMapper = new EntityJsonMapper<>(new Gson());
-        RedditListingEntity listingEntity =
-              entityJsonMapper.transformEntity(SAMPLE_JSON_LISTING, RedditListingEntity.class);
+        EntityJsonMapper<RedditRootEntity>
+              entityJsonMapper =
+              EntityJsonMapperFactory.getInstance().create(RedditRootEntity.class);
+        RedditRootEntity listingEntity =
+              entityJsonMapper.transformEntity(SAMPLE_JSON_ROOT, RedditRootEntity.class);
         assertNotNull(listingEntity);
     }
 
     @Test public void test_TransformChildEntity() throws Exception {
         EntityJsonMapper<RedditListingDataEntity> entityJsonMapper =
-              new EntityJsonMapper<>(gson);
+              EntityJsonMapperFactory.getInstance().create(RedditListingDataEntity.class);
         RedditListingDataEntity childEntity =
               entityJsonMapper.transformEntity(SAMPLE_JSON_CHILD, RedditListingDataEntity.class);
         assertNotNull(childEntity);
@@ -313,11 +366,11 @@ public class EntityJsonMapperTest extends TestCase {
                    is("http://b.thumbs.redditmedia"
                             + ".com/tMJCXfTNx6ZZEPIuOKM2qGrLJm5VCYubLru0_uFSn-o.jpg"));
         assertNotNull(redditEntity.preview);
-        List<ImageIdEntity> images = redditEntity.getImages();
+        List<ImageDataEntity> images = redditEntity.getImageData();
         assertNotNull(images);
         assertThat(images.size(), is(1));
 
-        ImageIdEntity imageId = images.get(0);
+        ImageDataEntity imageId = images.get(0);
         assertNotNull(imageId.source);
 
         ImageEntity sourceImage = imageId.getSourceImage();
@@ -330,5 +383,43 @@ public class EntityJsonMapperTest extends TestCase {
         List<ImageEntity> resolutions = imageId.getResolutions();
         assertNotNull(resolutions);
         assertThat(resolutions.size(), is(3));
+    }
+
+    @Test public void test_TransformRedditEntity_HappyCase()
+          throws Exception {
+
+        RedditEntity redditEntity =
+              (RedditEntity) EntityJsonMapperFactory
+                    .getInstance()
+                    .create(RedditEntity.class)
+                    .transformEntity(SAMPLE_JSON_REDDIT, RedditEntity.class);
+        assertNotNull(redditEntity);
+        assertThat(redditEntity.id, is("4bm6go"));
+        assertThat(redditEntity.title,
+                   is("I had to chop up a load of wood, he wouldn't leave my side but I think "
+                            + "we've found a solution..."));
+        assertThat(redditEntity.name, is("t3_4bm6go"));
+        assertThat(redditEntity.created, is(1458763583.0));
+        assertThat(redditEntity.thumbnail,
+                   is("http://b.thumbs.redditmedia"
+                            + ".com/6_-Sbz0sQLJiCAb1NENnEgYYVIftCX3pUxpHGxj8jVc.jpg"));
+        assertNotNull(redditEntity.preview);
+        List<ImageDataEntity> images = redditEntity.getImageData();
+        assertNotNull(images);
+        assertThat(images.size(), is(1));
+
+        ImageDataEntity imageId = images.get(0);
+        assertNotNull(imageId.source);
+
+        ImageEntity sourceImage = imageId.getSourceImage();
+        assertThat(sourceImage.url,
+                   is("https://i.redditmedia.com/UCVCuwFyQfpX8d6KnKJLyL0C-UO8M_4O2opQbtnWPKk"
+                            + ".jpg?s=12d4d98acab9916ca9436f092f71f327"));
+        assertThat(sourceImage.width, is(2448));
+        assertThat(sourceImage.height, is(3264));
+
+        List<ImageEntity> resolutions = imageId.getResolutions();
+        assertNotNull(resolutions);
+        assertThat(resolutions.size(), is(6));
     }
 }

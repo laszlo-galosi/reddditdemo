@@ -1,105 +1,72 @@
 package hu.reddit.developer.redditdemo;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import java.util.List;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import hu.reddit.developer.redditdemo.helpers.Constants;
 import trikita.log.Log;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
-    private CoordinatorLayout mCoordinatorLayout;
+    private static final String TAG = "MainActivity";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    @Override public String getScreenTag() {
+        return TAG;
+    }
+
+    @Override public int getScreenLayout() {
+        return R.layout.activity_main;
+    }
+
+    @Override public String getToolbarTitle() {
+        return getString(R.string.app_name);
+    }
+
+    public void setToolbarTitle(final String title) {
+        mToolbar.setTitle(title);
+    }
+
+    @Override public void onInitView() {
+        ButterKnife.bind(this);
+        mToolbar.setNavigationIcon(R.mipmap.ic_launcher);
+        registerBroadcastReceiver();
+    }
+
+    @Override protected void onDestroy() {
+        super.onDestroy();
+        ButterKnife.unbind(this);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Log.w("onNewIntent", intent);
         super.onNewIntent(intent);
         if (intent.getAction().equals(Constants.BROADCAST_DATA_ACTION)) {
+            Log.w("onNewIntent", intent);
             if (intent.hasExtra(Constants.BROADCAST_EXTRA_ERROR)) {
                 @StringRes int errorResId = intent.getIntExtra(
                       Constants.BROADCAST_EXTRA_ERROR,
                       R.string.snack_general_error);
-                makeWarningSnackBar(errorResId, R.string.snack_action_retry,
-                                    new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                        }
-                                    });
+                SnackbarMaker.getInstance().setMessageRes(errorResId)
+                             .positiveAction(R.string.snack_action_retry)
+                             .positiveActionClicked(new View.OnClickListener() {
+                                 @Override
+                                 public void onClick(View v) {
+                                     startFetchRedditService();
+                                 }
+                             }).make(this, mCoordinatorLayout);
+            } else if (intent.hasExtra(Constants.KEY_PARAM_SUBREDDIT)) {
+                String title =
+                      String.format("#%s", intent.getStringExtra(Constants.KEY_PARAM_SUBREDDIT)
+                                                 .toLowerCase());
+                mToolbar.setTitle(title);
             }
         }
     }
 
-    /**
-     * Creates an IntentService wich connects to the openWeatherMap API.
-     */
-    private void startFetchDataService() {
-        Intent fetchIntent = new Intent(Constants.FETCH_DATA_ACTION);
-        fetchIntent.addCategory(Constants.FETCH_DATA_CATEGORY);
-        Log.d("startFetchDataService with ", fetchIntent);
-        //we need an explicit intent since Android L
-        //see: https://commonsware.com/blog/2014/06/29/dealing-deprecations-bindservice.html
-        startService(convertToExplicitIntent(this, fetchIntent));
-    }
-
-    /**
-     * Converts an implicit intent to an explicit intent, required since Android L.
-     * see : https://commonsware.com/blog/2014/06/29/dealing-deprecations-bindservice.html
-     *
-     * @param context the context
-     * @param implicitIntent implicit intent which to be converted.
-     * @return the explicit intent from the specified implicit intent.
-     */
-    public static Intent convertToExplicitIntent(final Context context,
-          final Intent implicitIntent) {
-        //Retrieve all services that can match the given intent
-        PackageManager pm = context.getPackageManager();
-        List<ResolveInfo> resolveInfo = pm.queryIntentServices(implicitIntent, 0);
-
-        //Make sure only one match was found
-        if (resolveInfo == null || resolveInfo.size() != 1) {
-            return null;
-        }
-
-        //Get component info and create ComponentName
-        final ResolveInfo serviceInfo = resolveInfo.get(0);
-        final String packageName = serviceInfo.serviceInfo.packageName;
-        final String className = serviceInfo.serviceInfo.name;
-        final ComponentName component = new ComponentName(packageName, className);
-
-        //Create a new intent. Use the old one for extras and such reuse
-        Intent explicitIntent = new Intent(implicitIntent);
-
-        //Set the component to be explicit
-        explicitIntent.setComponent(component);
-        return explicitIntent;
-    }
-
-    private void makeWarningSnackBar(@StringRes int messageResId,
-          @StringRes int actionResId,
-          @Nullable View.OnClickListener clickListener) {
-        Log.w(getString(messageResId));
-
-        @ColorInt int actionColor = getResources().getColor(R.color.primary);
-
-        Snackbar.make(mCoordinatorLayout, getString(messageResId), Snackbar.LENGTH_LONG)
-                .setAction(actionResId, clickListener)
-                .setActionTextColor(actionColor)
-                .show();
+    @OnClick(R.id.actionFab)
+    public void refresh() {
+        startFetchRedditService();
     }
 }

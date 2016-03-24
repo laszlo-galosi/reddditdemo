@@ -11,5 +11,11 @@
   <string name="snack_error_fetch_data">Network error, check the settings</string>
   <string name="snack_no_location_service">Cannot retrieve GPS data</string>
   <string name="snack_error_check_internet">Check internet connection.</string>
-  <string name="posted_at">posted at</string>
+  <string name="posted_at">on</string>
+  <string name="snackbar_action_ok">Ok</string>
+  <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed
+    diamnonummy
+  </string>
+  <string name="by_author">by</string>
+
 </resources>

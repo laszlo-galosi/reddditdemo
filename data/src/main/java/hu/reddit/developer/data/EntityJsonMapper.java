@@ -5,9 +5,10 @@ package hu.reddit.developer.data;
  */
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import java.util.Arrays;
 import java.util.List;
+import trikita.log.Log;
 
 /**
  * This class transforms a json string to a class instance of generic type.
@@ -15,10 +16,12 @@ import java.util.List;
  */
 public class EntityJsonMapper<T extends BasicEntity> {
 
-    private Gson gson;
+    private final Gson gson;
+    private JsonSerializer<T> mJsonSerializer;
 
-    public EntityJsonMapper(final Gson gson) {
+    public EntityJsonMapper(final Gson gson, final JsonParser jsonParser) {
         this.gson = gson;
+        mJsonSerializer = new JsonSerializer<>(gson, jsonParser);
     }
 
     /**
@@ -32,7 +35,12 @@ public class EntityJsonMapper<T extends BasicEntity> {
     public final T transformEntity(final String jsonResponse, final Class<T> entityClass)
           throws JsonSyntaxException {
         try {
-            return this.gson.fromJson(jsonResponse, entityClass);
+            if (entityClass == RedditEntity.class) {
+                return (T) RedditEntity.deserialize(jsonResponse, mJsonSerializer.getJsonParser());
+            } else {
+                Log.v("transformEntity", entityClass.getSimpleName()).v(jsonResponse);
+                return mJsonSerializer.deserialize(jsonResponse, entityClass);
+            }
         } catch (JsonSyntaxException jsonException) {
             throw jsonException;
         }
@@ -47,12 +55,17 @@ public class EntityJsonMapper<T extends BasicEntity> {
      * structure.
      */
     public final List<T> transformEntityCollection(final String entityListJsonResponse,
-          final Class<T[]> entityClass) throws JsonSyntaxException {
+          final Class<T> entityClass) throws JsonSyntaxException {
         try {
-            final T[] entityCollection = this.gson.fromJson(entityListJsonResponse, entityClass);
-            return Arrays.asList(entityCollection);
+            Log.v("transformEntityCollection", entityClass.getSimpleName())
+               .v(entityListJsonResponse);
+            return mJsonSerializer.deserializeAll(entityListJsonResponse, entityClass);
         } catch (JsonSyntaxException jsonException) {
             throw jsonException;
         }
+    }
+
+    public JsonSerializer<T> getJsonSerializer() {
+        return mJsonSerializer;
     }
 }

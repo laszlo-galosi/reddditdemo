@@ -19,7 +19,7 @@ public class ItemViewHolderBase extends RecyclerView.ViewHolder
     protected Object mDataItem;
 
     @Override public void bind(final Object dataItem) {
-        Log.d("bind", dataItem.toString());
+        Log.v("bind", dataItem.toString());
         mDataItem = dataItem;
     }
 
